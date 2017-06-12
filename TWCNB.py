@@ -149,6 +149,16 @@ def inverseDocumentFrequency():
             denominator += wordInDocument(key, sentence)
         corpus_words[key] = val * math.log10(numerator/denominator)
 
+# def lengthTransformation():
+#     """
+#     Calculate the frequencies based on the terms frequency per document
+#     And then recalculate the entire frequency.
+#     :return: Recalculated frequencies
+#     """
+#     global corpus_words I"M SKIPPING STEP 3 BECAUSE MULTINOMIAL MODEL DOES IT VERY WELL
+# AND CHANGES ARE SUBTLE
+
+
 def wordInDocument(word, sentence):
     """
     Check if the word passed in is in the document.
