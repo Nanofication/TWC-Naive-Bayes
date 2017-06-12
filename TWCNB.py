@@ -92,6 +92,7 @@ training_data.append({"class":"email", "sentence":"can I get your email?"})
 
 corpus_words = {}
 class_words = {}
+lemmatized_sentences = []
 
 # Turn a list into a set of unique items and then a list again to remove duplications
 classes = list(set([a['class'] for a in training_data]))
@@ -102,6 +103,7 @@ for c in classes:
 # Loop through each sentence in our training data
 for data in training_data:
     # Tokenize each sentence into words
+    sentence = set()
     for word in nltk.word_tokenize(data['sentence']):
         # ignore some things
         if word not in ["?", "'s"]:
@@ -112,8 +114,10 @@ for data in training_data:
             else:
                 corpus_words[stemmed_word] += 1
             # Add the word to our words in class list
+            sentence.add(stemmed_word)
             # This is frequency so we need to change this part
             class_words[data['class']].extend([stemmed_word])
+    lemmatized_sentences.append(sentence)
 
 def convertAllFrequencies():
     """
@@ -131,13 +135,43 @@ def transformTermFrequency(freq):
     :return: the terms adjusted frequency
     """
     return math.log10(freq + 1)
-# print("Corpus words and counts: {0}").format(corpus_words)
+
+def inverseDocumentFrequency():
+    """
+    Recalculate frequencies based on the term's number of occurrences in document
+    :return: Recalculated frequencies
+    """
+    global corpus_words
+    for key, val in corpus_words.iteritems():
+        numerator = len(training_data)
+        denominator = 0 # I need to find a way to avoid this issue
+        for sentence in lemmatized_sentences:
+            denominator += wordInDocument(key, sentence)
+        corpus_words[key] = val * math.log10(numerator/denominator)
+
+def wordInDocument(word, sentence):
+    """
+    Check if the word passed in is in the document.
+    :param word: The word being checked if the document contains it
+    :return: If word exists in document return 1 else 0
+    """
+    if word in sentence:
+        return 1
+    return 0
 
 for key,value in corpus_words.iteritems():
     print "Key: ", key," ", "Value: ", value
 convertAllFrequencies()
+
 print "AFTER CONVERSION!"
+
 for key,value in corpus_words.iteritems():
     print "Key: ", key," ", "Value: ", value
-# Class words
 # print("Class words: {0}").format(class_words)
+
+inverseDocumentFrequency()
+print "After Inverse Doc Frequency"
+
+for key,value in corpus_words.iteritems():
+    print "Key: ", key," ", "Value: ", value
+
