@@ -158,6 +158,17 @@ def inverseDocumentFrequency():
 #     global corpus_words I"M SKIPPING STEP 3 BECAUSE MULTINOMIAL MODEL DOES IT VERY WELL
 # AND CHANGES ARE SUBTLE
 
+def calculate_class_score(sentence, class_name, show_details=True):
+    score = 0
+
+    for word in nltk.word_tokenize(sentence):
+        if stemmer.stem(word.lower()) in class_words[class_name]:
+            # Treat each word with relative weight
+            score += (1.0 / corpus_words[stemmer.stem(word.lower())])
+            if show_details:
+                print (
+                "   match: %s (%s)" % (stemmer.stem(word.lower()), 1.0 / corpus_words[stemmer.stem(word.lower())]))
+    return score
 
 def wordInDocument(word, sentence):
     """
@@ -168,6 +179,20 @@ def wordInDocument(word, sentence):
     if word in sentence:
         return 1
     return 0
+
+def classify(sentence):
+    high_class = None
+    high_score = 0
+    # loop through our classes
+    for c in class_words.keys():
+        # calculate score of sentence for each class
+        score = calculate_class_score(sentence, c)
+        # keep track of highest score
+        if score > high_score:
+            high_class = c
+            high_score = score
+
+    return high_class, high_score
 
 for key,value in corpus_words.iteritems():
     print "Key: ", key," ", "Value: ", value
@@ -185,3 +210,6 @@ print "After Inverse Doc Frequency"
 for key,value in corpus_words.iteritems():
     print "Key: ", key," ", "Value: ", value
 
+sentence = raw_input("Type a sentence: ")
+
+print classify(sentence)
