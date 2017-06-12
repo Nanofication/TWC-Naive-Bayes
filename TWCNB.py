@@ -13,8 +13,11 @@ David R. Karger
 
 """
 
+import math
+
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
+
 
 # Word stemmer. Reduce words to the root forms for better classification
 stemmer = LancasterStemmer()
@@ -87,3 +90,54 @@ training_data.append({"class":"email", "sentence":"email please?"})
 training_data.append({"class":"email", "sentence":"may I have your email?"})
 training_data.append({"class":"email", "sentence":"can I get your email?"})
 
+corpus_words = {}
+class_words = {}
+
+# Turn a list into a set of unique items and then a list again to remove duplications
+classes = list(set([a['class'] for a in training_data]))
+
+for c in classes:
+    class_words[c] = []
+
+# Loop through each sentence in our training data
+for data in training_data:
+    # Tokenize each sentence into words
+    for word in nltk.word_tokenize(data['sentence']):
+        # ignore some things
+        if word not in ["?", "'s"]:
+            stemmed_word = stemmer.stem(word.lower())
+            # Have we not seen this word already?
+            if stemmed_word not in corpus_words:
+                corpus_words[stemmed_word] = 1
+            else:
+                corpus_words[stemmed_word] += 1
+            # Add the word to our words in class list
+            # This is frequency so we need to change this part
+            class_words[data['class']].extend([stemmed_word])
+
+def convertAllFrequencies():
+    """
+    Loop through all the words and convert the frequencies
+    """
+    global corpus_words
+    for key, value in corpus_words.iteritems():
+        corpus_words[key] = transformTermFrequency(value)
+
+def transformTermFrequency(freq):
+    """
+    Adjust the given term's frequency to produce a more empirical distribution
+    Note: We use this after the regular frequencies of all words are figured out
+    We just adjust them
+    :return: the terms adjusted frequency
+    """
+    return math.log10(freq + 1)
+# print("Corpus words and counts: {0}").format(corpus_words)
+
+for key,value in corpus_words.iteritems():
+    print "Key: ", key," ", "Value: ", value
+convertAllFrequencies()
+print "AFTER CONVERSION!"
+for key,value in corpus_words.iteritems():
+    print "Key: ", key," ", "Value: ", value
+# Class words
+# print("Class words: {0}").format(class_words)
