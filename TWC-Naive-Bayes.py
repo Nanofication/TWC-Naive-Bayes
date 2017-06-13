@@ -18,7 +18,7 @@ import nltk
 from nltk.stem.lancaster import LancasterStemmer
 
 from ClassifierClass import Class
-
+from DataClass import TrainingData
 
 # Word stemmer. Reduce words to the root forms for better classification
 stemmer = LancasterStemmer()
@@ -97,10 +97,13 @@ CLASSES = list(set([a['class'] for a in training_data]))
 
 CLASS_DICT = {}
 
+TRAINING_DATA_STATS = TrainingData("Training Data 1")
+
 def initializeData():
     global CLASS_WORDS
     global CLASSES
     global CLASS_DICT
+    global TRAINING_DATA_STATS
 
     for i in range(len(CLASSES)):
         CLASS_DICT[CLASSES[i]] = Class(CLASSES[i])
@@ -117,7 +120,13 @@ def initializeData():
                 # This is frequency so we need to change this part
                 CLASS_DICT[data['class']].addWords([stemmed_word])
 
+                TRAINING_DATA_STATS.addToWordFreq(stemmed_word)
+                TRAINING_DATA_STATS.addWords([stemmed_word])
+
     for key, val in CLASS_DICT.iteritems():
-        print key, ": ", val.class_name, " ", val.words, " | ", val.word_freq
+        print key, ": ", val.class_name, " ", val.words, " | ", val.word_freq, " | ", val.word_count
+
+    for key, val in TRAINING_DATA_STATS.word_freq.iteritems():
+        print key, ": ", val
 
 initializeData()

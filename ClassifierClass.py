@@ -10,6 +10,7 @@ class Class:
         self.class_name = class_name
         self.words = []
         self.word_freq = {}
+        self.word_count = 0
 
     def addToWordFreq(self, word):
         if word not in self.word_freq:
@@ -19,3 +20,4 @@ class Class:
 
     def addWords(self, word):
         self.words.extend(word)
+        self.word_count += 1
