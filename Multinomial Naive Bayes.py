@@ -14,10 +14,11 @@ David R. Karger
 """
 
 import math
-
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
 
+from ClassifierClass import Class
+from DataClass import TrainingData
 
 # Word stemmer. Reduce words to the root forms for better classification
 stemmer = LancasterStemmer()
@@ -90,113 +91,66 @@ training_data.append({"class":"email", "sentence":"email please?"})
 training_data.append({"class":"email", "sentence":"may I have your email?"})
 training_data.append({"class":"email", "sentence":"can I get your email?"})
 
-corpus_words = {}
-class_words = {}
-lemmatized_sentences = []
+CLASS_WORDS = {}
 
-# Turn a list into a set of unique items and then a list again to remove duplications
-classes = list(set([a['class'] for a in training_data]))
+CLASSES = list(set([a['class'] for a in training_data]))
 
-for c in classes:
-    class_words[c] = []
+CLASS_DICT = {}
 
-# Loop through each sentence in our training data
-for data in training_data:
-    # Tokenize each sentence into words
-    sentence = set()
-    for word in nltk.word_tokenize(data['sentence']):
-        # ignore some things
-        if word not in ["?", "'s"]:
-            stemmed_word = stemmer.stem(word.lower())
-            # Have we not seen this word already?
-            if stemmed_word not in corpus_words:
-                corpus_words[stemmed_word] = 1
-            else:
-                corpus_words[stemmed_word] += 1
-            # Add the word to our words in class list
-            sentence.add(stemmed_word)
-            # This is frequency so we need to change this part
-            class_words[data['class']].extend([stemmed_word])
-    lemmatized_sentences.append(sentence)
+TRAINING_DATA_STATS = TrainingData("Training Data 1")
 
-def convertAllFrequencies():
-    """
-    Loop through all the words and convert the frequencies
-    """
-    global corpus_words
-    for key, value in corpus_words.iteritems():
-        corpus_words[key] = transformTermFrequency(value)
+def initializeData():
+    global CLASS_WORDS
+    global CLASSES
+    global CLASS_DICT
+    global TRAINING_DATA_STATS
 
-def transformTermFrequency(freq):
-    """
-    Adjust the given term's frequency to produce a more empirical distribution
-    Note: We use this after the regular frequencies of all words are figured out
-    We just adjust them
-    :return: the terms adjusted frequency
-    """
-    return math.log10(freq + 1)
+    for i in range(len(CLASSES)):
+        CLASS_DICT[CLASSES[i]] = Class(CLASSES[i])
 
-def inverseDocumentFrequency():
-    """
-    Recalculate frequencies based on the term's number of occurrences in document
-    :return: Recalculated frequencies
-    """
-    global corpus_words
-    for key, val in corpus_words.iteritems():
-        numerator = len(training_data)
-        denominator = 0 # I need to find a way to avoid this issue
-        for sentence in lemmatized_sentences:
-            denominator += wordInDocument(key, sentence)
-        corpus_words[key] = val * math.log10(numerator/denominator)
+    for data in training_data:
+        # Tokenize each sentence into words
+        for word in nltk.word_tokenize(data['sentence']):
+            # ignore some things
+            if word not in ["?", "'s"]:
+                stemmed_word = stemmer.stem(word.lower())
+                # Have we not seen this word already?
+                CLASS_DICT[data['class']].addToWordFreq(stemmed_word)
+                # Add the word to our words in class list
+                # This is frequency so we need to change this part
+                CLASS_DICT[data['class']].addWords([stemmed_word])
 
-# def lengthTransformation():
-#     """
-#     Calculate the frequencies based on the terms frequency per document
-#     And then recalculate the entire frequency.
-#     :return: Recalculated frequencies
-#     """
-#     global corpus_words I"M SKIPPING STEP 3 BECAUSE MULTINOMIAL MODEL DOES IT VERY WELL
-# AND CHANGES ARE SUBTLE
+                TRAINING_DATA_STATS.addToWordFreq(stemmed_word)
+                TRAINING_DATA_STATS.addWords([stemmed_word])
 
-def weightNormalizing(score):
-    """
-    Normalize the score from naive bayes
-    :param score: The score calculated using naive bayes
-    :return: recalculated score
-    """
-    weight = math.log10(math.fabs(score))
-    weight = weight / (math.log10(math.fabs()))
-    return weight
-# DOUBLE CHECK THIS FUNCTION IT CURRENTLY DOES NOT WORK PROPERLY!
+    # for key, val in CLASS_DICT.iteritems():
+    #     print key, ": ", val.class_name, " ", val.words, " | ", val.word_freq, " | ", val.word_count
+    #
+    # for key, val in TRAINING_DATA_STATS.word_freq.iteritems():
+    #     print key, ": ", val
+
 def calculate_class_score(sentence, class_name, show_details=True):
+    global CLASS_DICT
     score = 0
 
     for word in nltk.word_tokenize(sentence):
-        if stemmer.stem(word.lower()) in class_words[class_name]:
+        if stemmer.stem(word.lower()) in CLASS_DICT[class_name].word_freq:
             # Treat each word with relative weight
-            current_score = 1.0 / corpus_words[stemmer.stem(word.lower())] # Frequency of all classes
+            current_score = 1.0 / TRAINING_DATA_STATS.word_freq[stemmer.stem(word.lower())]
             score += current_score
 
             if show_details:
                 print (
-                "   match: %s (%s)" % (stemmer.stem(word.lower()), 1.0 / corpus_words[stemmer.stem(word.lower())]))
+                "   match: %s (%s)" % (stemmer.stem(word.lower()), 1.0 / TRAINING_DATA_STATS.word_freq[stemmer.stem(word.lower())]))
     return score
 
-def wordInDocument(word, sentence):
-    """
-    Check if the word passed in is in the document.
-    :param word: The word being checked if the document contains it
-    :return: If word exists in document return 1 else 0
-    """
-    if word in sentence:
-        return 1
-    return 0
-
 def classify(sentence):
+    global CLASS_DICT
+
     high_class = None
     high_score = 0
     # loop through our classes
-    for c in class_words.keys():
+    for c in CLASS_DICT.keys():
         # calculate score of sentence for each class
         score = calculate_class_score(sentence, c)
         # keep track of highest score
@@ -206,25 +160,11 @@ def classify(sentence):
 
     return high_class, high_score
 
-# for key,value in corpus_words.iteritems():
-#     print "Key: ", key," ", "Value: ", value
-# convertAllFrequencies()
-#
-# print "AFTER CONVERSION!"
-#
-# for key,value in corpus_words.iteritems():
-#     print "Key: ", key," ", "Value: ", value
-# # print("Class words: {0}").format(class_words)
-#
-# inverseDocumentFrequency()
-# print "After Inverse Doc Frequency"
-#
-# for key,value in corpus_words.iteritems():
-#     print "Key: ", key," ", "Value: ", value
-#
 # sentence = raw_input("Type a sentence: ")
 #
 # print classify(sentence)
 
-for key,val in class_words.iteritems():
-    print "Key: ", key," ", "Value: ", val
+if __name__ == "__main__":
+    initializeData()
+    sentence = "Hello how are you doing?"
+    print classify(sentence)
