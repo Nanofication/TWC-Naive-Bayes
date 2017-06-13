@@ -14,9 +14,10 @@ David R. Karger
 """
 
 import math
-
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
+
+from ClassifierClass import Class
 
 
 # Word stemmer. Reduce words to the root forms for better classification
@@ -89,3 +90,34 @@ training_data.append({"class":"email", "sentence":"your email address?"})
 training_data.append({"class":"email", "sentence":"email please?"})
 training_data.append({"class":"email", "sentence":"may I have your email?"})
 training_data.append({"class":"email", "sentence":"can I get your email?"})
+
+CLASS_WORDS = {}
+
+CLASSES = list(set([a['class'] for a in training_data]))
+
+CLASS_DICT = {}
+
+def initializeData():
+    global CLASS_WORDS
+    global CLASSES
+    global CLASS_DICT
+
+    for i in range(len(CLASSES)):
+        CLASS_DICT[CLASSES[i]] = Class(CLASSES[i])
+
+    for data in training_data:
+        # Tokenize each sentence into words
+        for word in nltk.word_tokenize(data['sentence']):
+            # ignore some things
+            if word not in ["?", "'s"]:
+                stemmed_word = stemmer.stem(word.lower())
+                # Have we not seen this word already?
+                CLASS_DICT[data['class']].addToWordFreq(stemmed_word)
+                # Add the word to our words in class list
+                # This is frequency so we need to change this part
+                CLASS_DICT[data['class']].addWords([stemmed_word])
+
+    for key, val in CLASS_DICT.iteritems():
+        print key, ": ", val.class_name, " ", val.words, " | ", val.word_freq
+
+initializeData()

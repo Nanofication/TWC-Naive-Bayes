@@ -206,22 +206,25 @@ def classify(sentence):
 
     return high_class, high_score
 
-for key,value in corpus_words.iteritems():
-    print "Key: ", key," ", "Value: ", value
-convertAllFrequencies()
+# for key,value in corpus_words.iteritems():
+#     print "Key: ", key," ", "Value: ", value
+# convertAllFrequencies()
+#
+# print "AFTER CONVERSION!"
+#
+# for key,value in corpus_words.iteritems():
+#     print "Key: ", key," ", "Value: ", value
+# # print("Class words: {0}").format(class_words)
+#
+# inverseDocumentFrequency()
+# print "After Inverse Doc Frequency"
+#
+# for key,value in corpus_words.iteritems():
+#     print "Key: ", key," ", "Value: ", value
+#
+# sentence = raw_input("Type a sentence: ")
+#
+# print classify(sentence)
 
-print "AFTER CONVERSION!"
-
-for key,value in corpus_words.iteritems():
-    print "Key: ", key," ", "Value: ", value
-# print("Class words: {0}").format(class_words)
-
-inverseDocumentFrequency()
-print "After Inverse Doc Frequency"
-
-for key,value in corpus_words.iteritems():
-    print "Key: ", key," ", "Value: ", value
-
-sentence = raw_input("Type a sentence: ")
-
-print classify(sentence)
+for key,val in class_words.iteritems():
+    print "Key: ", key," ", "Value: ", val
