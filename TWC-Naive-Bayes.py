@@ -134,12 +134,6 @@ def initializeData():
             TRAINING_DATA_STATS.addToTotalWordFreq(stemmed_word)
             TRAINING_DATA_STATS.addWords([stemmed_word])
 
-
-
-
-    print CLASS_DICT['greeting'].documents[16].word_freq
-    print CLASS_DICT['goodbye'].documents[3].word_freq
-
     # for key, val in CLASS_DICT.iteritems():
     #     print key, ": ", val.class_name, " ", val.words, " | ", val.word_freq, " | ", val.word_count
     #
@@ -150,6 +144,24 @@ def removeSpecialCharacters(sentence):
     pattern = re.compile('[^A-Za-z0-9 ]+')
     sentence = re.sub(pattern, '', sentence)
     return sentence
+
+
+
+###### Transformed Weighted Complement Naive Bayes #####
+
+def transformTermFrequency():
+    """
+    Transform all word weights from each class's individual documents
+    using the equation d_ij = log(d_ij + 1)
+
+    Return class with updated weights
+    """
+    global CLASS_DICT
+    for key, val in CLASS_DICT.iteritems():
+        for doc in val.documents:
+            doc.normalizeWordFreq()
+            print doc.normalized_word_freq
+            print doc.word_freq
 
 
 ####### MULTINOMIAL NAIVE BAYES TEST CODE #######
@@ -188,8 +200,9 @@ def classify(sentence):
 
 if __name__ == "__main__":
     initializeData()
+    transformTermFrequency()
 
     # Test using multinomial naive bayes
-    sentence = "Hello how are you doing?"
-
-    print classify(sentence)
+    # sentence = "Hello how are you doing?"
+    #
+    # print classify(sentence)
