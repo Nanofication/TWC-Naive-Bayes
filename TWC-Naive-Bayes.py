@@ -260,17 +260,22 @@ def skewDataBiasHandler():
                     try:
                         numerator += doc.normalized_word_freq[key] + alpha
                         totalAlpha += 1
-                        print "Sum of Normalized:  ", doc.sum_normalized_freq
                     except:
                         pass
                     denominator += doc.sumNormalizedFreq() + totalAlpha
-        print key, "| Numerator: ", numerator, "Denominator: ", denominator
+        # print key, "| Numerator: ", numerator, "Denominator: ", denominator
         TRAINING_DATA_STATS.word_normalized_freq[key] = numerator/denominator
 
+    # for key, val in TRAINING_DATA_STATS.word_normalized_freq.iteritems():
+    #     print key, "||| ", val
+
+def setWordWeights():
+    """
+    Pass all the weights after normalized and do a conversion.
+    :return: Store new value into training data's word weight
+    """
     for key, val in TRAINING_DATA_STATS.word_normalized_freq.iteritems():
-        print key, "||| ", val
-
-
+        TRAINING_DATA_STATS.word_weight[key] = math.log10(val)
 
 ####### MULTINOMIAL NAIVE BAYES TEST CODE #######
 
