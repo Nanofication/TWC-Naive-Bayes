@@ -21,3 +21,11 @@ class TrainingData:
 
     def addWords(self, word):
         self.word_count += 1
+
+    def getTotalWordWeight(self):
+        total = 0
+        for key, val in self.word_weight.iteritems():
+            total += val
+
+        self.totalWordWeight = total
+        return total

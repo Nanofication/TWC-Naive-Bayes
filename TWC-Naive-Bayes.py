@@ -99,6 +99,8 @@ CLASSES = list(set([a['class'] for a in training_data]))
 
 CLASS_DICT = {}
 
+LARGE_NEGATIVE_NUMBER = -2147483648 # You cannot have log 0 in math or code
+
 TRAINING_DATA_STATS = TrainingData("Training Data 1")
 
 def initializeData():
@@ -274,8 +276,27 @@ def setWordWeights():
     Pass all the weights after normalized and do a conversion.
     :return: Store new value into training data's word weight
     """
+    global TRAINING_DATA_STATS
+
     for key, val in TRAINING_DATA_STATS.word_normalized_freq.iteritems():
-        TRAINING_DATA_STATS.word_weight[key] = math.log10(val)
+        if val != 0:
+            TRAINING_DATA_STATS.word_weight[key] = math.log10(val)
+        else:
+            TRAINING_DATA_STATS.word_weight[key] = LARGE_NEGATIVE_NUMBER
+
+def normalizeWordWeights():
+    """
+    Normalize the word weights stored from training data
+    :return: The updated values of word weights
+    """
+    global TRAINING_DATA_STATS
+    total = TRAINING_DATA_STATS.getTotalWordWeight()
+
+    for key, val in TRAINING_DATA_STATS.word_weight.iteritems():
+        TRAINING_DATA_STATS.word_weight[key] = val / total
+
+    for key, val in TRAINING_DATA_STATS.word_weight.iteritems():
+        print key, ": ", val
 
 ####### MULTINOMIAL NAIVE BAYES TEST CODE #######
 
@@ -311,12 +332,17 @@ def classify(sentence):
     return high_class, high_score
 #####################################################
 
+# def classifyTWCNB(sentence):
+#
+
 if __name__ == "__main__":
     initializeData()
     transformTermFrequency()
     transformByDocFrequency()
     #transformByLength()
     skewDataBiasHandler()
+    setWordWeights()
+    normalizeWordWeights()
 
     # Test using multinomial naive bayes
     # sentence = "Hello how are you doing?"
