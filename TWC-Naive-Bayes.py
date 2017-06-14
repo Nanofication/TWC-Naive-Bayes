@@ -22,8 +22,6 @@ from ClassifierClass import Class
 from DataClass import TrainingData
 from DocumentClass import Document
 
-import MultinomialNaiveBayes #Using this to test accuracy of functions
-
 # Word stemmer. Reduce words to the root forms for better classification
 stemmer = LancasterStemmer()
 
@@ -116,23 +114,24 @@ def initializeData():
         # Tokenize each sentence into words
         sentence = removeSpecialCharacters(data['sentence'])
         sentence = nltk.word_tokenize(sentence)
+        sentence = lemmatizeSentence(sentence)
         doc_num = CLASS_DICT[data['class']].getTotalDocuments()
 
         document = Document(doc_num, sentence)
         CLASS_DICT[data['class']].addDocument(document)
+        TRAINING_DATA_STATS.training_docs.append(sentence)
 
         for word in sentence:
-            stemmed_word = stemmer.stem(word.lower())
             # Have we not seen this word already?
-            CLASS_DICT[data['class']].addToTotalClassWordFreq(stemmed_word)
+            CLASS_DICT[data['class']].addToTotalClassWordFreq(word)
             # Add the word to our words in class list
-            CLASS_DICT[data['class']].documents[doc_num].addToDocsWordFreq(stemmed_word)
+            CLASS_DICT[data['class']].documents[doc_num].addToDocsWordFreq(word)
 
             # This is frequency so we need to change this part
-            CLASS_DICT[data['class']].addWords([stemmed_word])
+            CLASS_DICT[data['class']].addWords([word])
 
-            TRAINING_DATA_STATS.addToTotalWordFreq(stemmed_word)
-            TRAINING_DATA_STATS.addWords([stemmed_word])
+            TRAINING_DATA_STATS.addToTotalWordFreq(word)
+            TRAINING_DATA_STATS.addWords([word])
 
     # for key, val in CLASS_DICT.iteritems():
     #     print key, ": ", val.class_name, " ", val.words, " | ", val.word_freq, " | ", val.word_count
@@ -140,12 +139,41 @@ def initializeData():
     # for key, val in TRAINING_DATA_STATS.word_freq.iteritems():
     #     print key, ": ", val
 
+def lemmatizeSentence(sentence):
+    """
+    Reduce each word in the sentence to its base case
+    :param sentence: The entire sentence to be lemmatized
+    :return: The sentence with words in its base case
+    """
+    for i in range(len(sentence)):
+        sentence[i] = stemmer.stem(sentence[i])
+    return sentence
+
 def removeSpecialCharacters(sentence):
     pattern = re.compile('[^A-Za-z0-9 ]+')
     sentence = re.sub(pattern, '', sentence)
     return sentence
 
+def wordInDocument(word, sentence):
+    """
+    Check if the word passed in is in the document.
+    :param word: The word being checked if the document contains it
+    :return: If word exists in document return 1 else 0
+    """
+    if word in sentence:
+        return 1
+    return 0
 
+def checkAllInstancesOfWord(word):
+    """
+    Check the number of times the word occurs in the list of training documents
+    :param word: Word to be checked in each document
+    :return: Number of docs with one or more instance of word
+    """
+    total = 0
+    for doc in TRAINING_DATA_STATS.training_docs:
+        total += wordInDocument(word, doc)
+    return total
 
 ###### Transformed Weighted Complement Naive Bayes #####
 
@@ -162,6 +190,27 @@ def transformTermFrequency():
             doc.normalizeWordFreq()
             print doc.normalized_word_freq
             print doc.word_freq
+
+def transformByDocFrequency():
+    """
+    Transform the word weight based on frequency of the word occuring
+    in all documents.
+
+    Follow this equation d_ij = d_ij * log((Sum of all docs)/ Sum of if word occurs in doc)
+    :return: The class with updated weights.
+    """
+    global CLASS_DICT
+    global TRAINING_DATA_STATS
+
+    numerator = len(TRAINING_DATA_STATS.training_docs)
+
+    for key, val in CLASS_DICT.iteritems():
+        for doc in val.documents:
+            for k, v in doc.normalized_word_freq.iteritems():
+                denominator = checkAllInstancesOfWord(k)
+                doc.normalized_word_freq[k] = v * math.log10(numerator/denominator)
+
+
 
 
 ####### MULTINOMIAL NAIVE BAYES TEST CODE #######
@@ -201,6 +250,7 @@ def classify(sentence):
 if __name__ == "__main__":
     initializeData()
     transformTermFrequency()
+    transformByDocFrequency()
 
     # Test using multinomial naive bayes
     # sentence = "Hello how are you doing?"

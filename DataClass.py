@@ -9,6 +9,7 @@ class TrainingData:
         self.class_name = class_name
         self.word_freq = {}
         self.word_count = 0
+        self.training_docs = []
 
     def addToTotalWordFreq(self, word):
         if word not in self.word_freq:
