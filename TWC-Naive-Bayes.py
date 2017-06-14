@@ -13,12 +13,16 @@ David R. Karger
 
 """
 
+import re
 import math
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
 
 from ClassifierClass import Class
 from DataClass import TrainingData
+from DocumentClass import Document
+
+import MultinomialNaiveBayes #Using this to test accuracy of functions
 
 # Word stemmer. Reduce words to the root forms for better classification
 stemmer = LancasterStemmer()
@@ -110,23 +114,82 @@ def initializeData():
 
     for data in training_data:
         # Tokenize each sentence into words
-        for word in nltk.word_tokenize(data['sentence']):
-            # ignore some things
-            if word not in ["?", "'s"]:
-                stemmed_word = stemmer.stem(word.lower())
-                # Have we not seen this word already?
-                CLASS_DICT[data['class']].addToWordFreq(stemmed_word)
-                # Add the word to our words in class list
-                # This is frequency so we need to change this part
-                CLASS_DICT[data['class']].addWords([stemmed_word])
+        sentence = removeSpecialCharacters(data['sentence'])
+        sentence = nltk.word_tokenize(sentence)
+        doc_num = CLASS_DICT[data['class']].getTotalDocuments()
 
-                TRAINING_DATA_STATS.addToWordFreq(stemmed_word)
-                TRAINING_DATA_STATS.addWords([stemmed_word])
+        document = Document(doc_num, sentence)
+        CLASS_DICT[data['class']].addDocument(document)
 
-    for key, val in CLASS_DICT.iteritems():
-        print key, ": ", val.class_name, " ", val.words, " | ", val.word_freq, " | ", val.word_count
+        for word in sentence:
+            stemmed_word = stemmer.stem(word.lower())
+            # Have we not seen this word already?
+            CLASS_DICT[data['class']].addToTotalClassWordFreq(stemmed_word)
+            # Add the word to our words in class list
+            CLASS_DICT[data['class']].documents[doc_num].addToDocsWordFreq(stemmed_word)
 
-    for key, val in TRAINING_DATA_STATS.word_freq.iteritems():
-        print key, ": ", val
+            # This is frequency so we need to change this part
+            CLASS_DICT[data['class']].addWords([stemmed_word])
 
-initializeData()
+            TRAINING_DATA_STATS.addToTotalWordFreq(stemmed_word)
+            TRAINING_DATA_STATS.addWords([stemmed_word])
+
+
+
+
+    print CLASS_DICT['greeting'].documents[16].word_freq
+    print CLASS_DICT['goodbye'].documents[3].word_freq
+
+    # for key, val in CLASS_DICT.iteritems():
+    #     print key, ": ", val.class_name, " ", val.words, " | ", val.word_freq, " | ", val.word_count
+    #
+    # for key, val in TRAINING_DATA_STATS.word_freq.iteritems():
+    #     print key, ": ", val
+
+def removeSpecialCharacters(sentence):
+    pattern = re.compile('[^A-Za-z0-9 ]+')
+    sentence = re.sub(pattern, '', sentence)
+    return sentence
+
+
+####### MULTINOMIAL NAIVE BAYES TEST CODE #######
+
+def calculate_class_score(sentence, class_name, show_details=True):
+    global CLASS_DICT
+    score = 0
+
+    for word in nltk.word_tokenize(sentence):
+        if stemmer.stem(word.lower()) in CLASS_DICT[class_name].word_freq:
+            # Treat each word with relative weight
+            current_score = 1.0 / TRAINING_DATA_STATS.word_freq[stemmer.stem(word.lower())]
+            score += current_score
+
+            if show_details:
+                print (
+                "   match: %s (%s)" % (stemmer.stem(word.lower()), 1.0 / TRAINING_DATA_STATS.word_freq[stemmer.stem(word.lower())]))
+    return score
+
+def classify(sentence):
+    global CLASS_DICT
+
+    high_class = None
+    high_score = 0
+    # loop through our classes
+    for c in CLASS_DICT.keys():
+        # calculate score of sentence for each class
+        score = calculate_class_score(sentence, c)
+        # keep track of highest score
+        if score > high_score:
+            high_class = c
+            high_score = score
+
+    return high_class, high_score
+#####################################################
+
+if __name__ == "__main__":
+    initializeData()
+
+    # Test using multinomial naive bayes
+    sentence = "Hello how are you doing?"
+
+    print classify(sentence)

@@ -10,7 +10,7 @@ class TrainingData:
         self.word_freq = {}
         self.word_count = 0
 
-    def addToWordFreq(self, word):
+    def addToTotalWordFreq(self, word):
         if word not in self.word_freq:
             self.word_freq[word] = 1
         else:

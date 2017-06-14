@@ -115,12 +115,12 @@ def initializeData():
             if word not in ["?", "'s"]:
                 stemmed_word = stemmer.stem(word.lower())
                 # Have we not seen this word already?
-                CLASS_DICT[data['class']].addToWordFreq(stemmed_word)
+                CLASS_DICT[data['class']].addToTotalClassWordFreq(stemmed_word)
                 # Add the word to our words in class list
                 # This is frequency so we need to change this part
                 CLASS_DICT[data['class']].addWords([stemmed_word])
 
-                TRAINING_DATA_STATS.addToWordFreq(stemmed_word)
+                TRAINING_DATA_STATS.addToTotalClassWordFreq(stemmed_word)
                 TRAINING_DATA_STATS.addWords([stemmed_word])
 
     # for key, val in CLASS_DICT.iteritems():
