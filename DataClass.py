@@ -8,6 +8,7 @@ class TrainingData:
     def __init__(self, class_name):
         self.class_name = class_name
         self.word_freq = {}
+        self.word_normalized_freq = {}
         self.word_count = 0
         self.training_docs = []
 

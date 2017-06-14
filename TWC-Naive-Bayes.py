@@ -117,7 +117,7 @@ def initializeData():
         sentence = lemmatizeSentence(sentence)
         doc_num = CLASS_DICT[data['class']].getTotalDocuments()
 
-        document = Document(doc_num, sentence)
+        document = Document(doc_num, data['class'], sentence)
         CLASS_DICT[data['class']].addDocument(document)
         TRAINING_DATA_STATS.training_docs.append(sentence)
 
@@ -196,6 +196,8 @@ def transformByDocFrequency():
     Transform the word weight based on frequency of the word occuring
     in all documents.
 
+    Caution: Runtime O(n^3)
+
     Follow this equation d_ij = d_ij * log((Sum of all docs)/ Sum of if word occurs in doc)
     :return: The class with updated weights.
     """
@@ -209,7 +211,64 @@ def transformByDocFrequency():
             for k, v in doc.normalized_word_freq.iteritems():
                 denominator = checkAllInstancesOfWord(k)
                 doc.normalized_word_freq[k] = v * math.log10(numerator/denominator)
+#
+# def transformByLength():
+#     """
+#     Convert d_ij by dividing this value with the square root of
+#     The sum of the square of number of times a word exists in the document
+#     :return:
+#     """
+#     global CLASS_DICT
+#     global TRAINING_DATA_STATS
+#
+#     for key, val in CLASS_DICT.iteritems():
+#         for doc in val.documents:
+#             for k, v in doc.normalized_word_freq.iteritems():
+#                 denominator = math.sqrt((TRAINING_DATA_STATS.word_freq[k])**2)
+#                 doc.normalized_word_freq[k] = val / denominator
+#                 print doc.normalized_word_freq
+#
+#   Multinomial Naive Bayes solves this issue, but look into it in future
 
+def skewDataBiasHandler():
+    """
+    Set the parameter weights of all words into a less biased value
+
+    Use the equation:
+    Normalized frequency = (SUM of specific word's frequency in all training sets - word frequency in current class)
+    Divided by (SUM of all word's frequency - words frequency in the given class)
+    """
+
+    global TRAINING_DATA_STATS
+    global CLASS_DICT
+    global CLASSES
+
+    alpha = 1
+
+    # for c in CLASSES:
+    #     for doc in CLASS_DICT[c].documents:
+    #         print doc.classification, ": ", doc.data
+
+    for key, val in TRAINING_DATA_STATS.word_freq.iteritems():
+        numerator = 0
+        denominator = 0
+        totalAlpha = 0
+        for c in CLASSES:
+            if key != c:
+                for doc in CLASS_DICT[c].documents:
+                    # I have each individual document
+                    try:
+                        numerator += doc.normalized_word_freq[key] + alpha
+                        totalAlpha += 1
+                        print "Sum of Normalized:  ", doc.sum_normalized_freq
+                    except:
+                        pass
+                    denominator += doc.sumNormalizedFreq() + totalAlpha
+        print key, "| Numerator: ", numerator, "Denominator: ", denominator
+        TRAINING_DATA_STATS.word_normalized_freq[key] = numerator/denominator
+
+    for key, val in TRAINING_DATA_STATS.word_normalized_freq.iteritems():
+        print key, "||| ", val
 
 
 
@@ -251,6 +310,8 @@ if __name__ == "__main__":
     initializeData()
     transformTermFrequency()
     transformByDocFrequency()
+    #transformByLength()
+    skewDataBiasHandler()
 
     # Test using multinomial naive bayes
     # sentence = "Hello how are you doing?"
