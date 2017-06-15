@@ -29,3 +29,9 @@ class TrainingData:
 
         self.totalWordWeight = total
         return total
+
+    def getTotalFreq(self):
+        total = 0
+        for values in self.word_freq.values():
+            total += values
+        return total
