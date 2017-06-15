@@ -12,9 +12,12 @@ Jaime Teevan
 David R. Karger
 
 """
+import random
+import ReadData
 
 import re
 import math
+import sys
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
 
@@ -25,73 +28,86 @@ from DocumentClass import Document
 # Word stemmer. Reduce words to the root forms for better classification
 stemmer = LancasterStemmer()
 
+# TESTING PURPOSES
+
+training_data = ReadData.TRAINING_DATA[:800]
+test_data = ReadData.TRAINING_DATA[800:]
+
 # 3 classes of training data. Play around with this
-training_data = []
-training_data.append({"class":"greeting", "sentence":"how are you?"})
-training_data.append({"class":"greeting", "sentence":"how is your day?"})
-training_data.append({"class":"greeting", "sentence":"good day"})
-training_data.append({"class":"greeting", "sentence":"how is it going today?"})
-training_data.append({"class":"greeting", "sentence":"what's up?"})
-training_data.append({"class":"greeting", "sentence":"hi"})
-training_data.append({"class":"greeting", "sentence":"how are you doing?"})
-training_data.append({"class":"greeting", "sentence":"what's new?"})
-training_data.append({"class":"greeting", "sentence":"how's life?"})
-training_data.append({"class":"greeting", "sentence":"how are you doing today?"})
-training_data.append({"class":"greeting", "sentence":"good to see you"})
-training_data.append({"class":"greeting", "sentence":"nice to see you"})
-training_data.append({"class":"greeting", "sentence":"long time no see"})
-training_data.append({"class":"greeting", "sentence":"it's been a while"})
-training_data.append({"class":"greeting", "sentence":"nice to meet you"})
-training_data.append({"class":"greeting", "sentence":"pleased to meet you"})
-training_data.append({"class":"greeting", "sentence":"how do you do"})
-training_data.append({"class":"greeting", "sentence":"yo"})
-training_data.append({"class":"greeting", "sentence":"howdy"})
-training_data.append({"class":"greeting", "sentence":"sup"})
-# 20 training data
+# training_data = []
+# training_data.append({"class":"greeting", "sentence":"how are you?"})
+# training_data.append({"class":"greeting", "sentence":"how is your day?"})
+# training_data.append({"class":"greeting", "sentence":"good day"})
+# training_data.append({"class":"greeting", "sentence":"how is it going today?"})
+# training_data.append({"class":"greeting", "sentence":"what's up?"})
+# training_data.append({"class":"greeting", "sentence":"hi"})
+# training_data.append({"class":"greeting", "sentence":"how are you doing?"})
+# training_data.append({"class":"greeting", "sentence":"what's new?"})
+# training_data.append({"class":"greeting", "sentence":"how's life?"})
+# training_data.append({"class":"greeting", "sentence":"how are you doing today?"})
+# training_data.append({"class":"greeting", "sentence":"good to see you"})
+# training_data.append({"class":"greeting", "sentence":"nice to see you"})
+# training_data.append({"class":"greeting", "sentence":"long time no see"})
+# training_data.append({"class":"greeting", "sentence":"it's been a while"})
+# training_data.append({"class":"greeting", "sentence":"nice to meet you"})
+# training_data.append({"class":"greeting", "sentence":"pleased to meet you"})
+# training_data.append({"class":"greeting", "sentence":"how do you do"})
+# training_data.append({"class":"greeting", "sentence":"yo"})
+# training_data.append({"class":"greeting", "sentence":"howdy"})
+# training_data.append({"class":"greeting", "sentence":"sup"})
+# # 20 training data
+#
+#
+# training_data.append({"class":"goodbye", "sentence":"have a nice day"})
+# training_data.append({"class":"goodbye", "sentence":"see you later"})
+# training_data.append({"class":"goodbye", "sentence":"have a nice day"})
+# training_data.append({"class":"goodbye", "sentence":"talk to you soon"})
+# training_data.append({"class":"goodbye", "sentence":"peace"})
+# training_data.append({"class":"goodbye", "sentence":"catch you later"})
+# training_data.append({"class":"goodbye", "sentence":"talk to you soon"})
+# training_data.append({"class":"goodbye", "sentence":"farewell"})
+# training_data.append({"class":"goodbye", "sentence":"have a good day"})
+# training_data.append({"class":"goodbye", "sentence":"take care"})
+# # 10 training datas
+# training_data.append({"class":"goodbye", "sentence":"bye!"})
+# training_data.append({"class":"goodbye", "sentence":"have a good one"})
+# training_data.append({"class":"goodbye", "sentence":"so long"})
+# training_data.append({"class":"goodbye", "sentence":"i'm out"})
+# training_data.append({"class":"goodbye", "sentence":"smell you later"})
+# training_data.append({"class":"goodbye", "sentence":"talk to you later"})
+# training_data.append({"class":"goodbye", "sentence":"take it easy"})
+# training_data.append({"class":"goodbye", "sentence":"i'm off"})
+# training_data.append({"class":"goodbye", "sentence":"until next time"})
+# training_data.append({"class":"goodbye", "sentence":"it was nice seeing you"})
+#
+# training_data.append({"class":"goodbye", "sentence":"it's been real"})
+# training_data.append({"class":"goodbye", "sentence":"im out of here"})
+#
+# training_data.append({"class":"sandwich", "sentence":"make me a sandwich"})
+# training_data.append({"class":"sandwich", "sentence":"can you make a sandwich?"})
+# training_data.append({"class":"sandwich", "sentence":"having a sandwich today?"})
+# training_data.append({"class":"sandwich", "sentence":"what's for lunch?"})
+#
+# training_data.append({"class":"email", "sentence":"what's your email address?"})
+# training_data.append({"class":"email", "sentence":"may I get your email?"})
+# training_data.append({"class":"email", "sentence":"can I have your email?"})
+# training_data.append({"class":"email", "sentence":"what's your email?"})
+# training_data.append({"class":"email", "sentence":"let me get your email"})
+# training_data.append({"class":"email", "sentence":"give me your email"})
+# training_data.append({"class":"email", "sentence":"i'll take your email address"})
+# training_data.append({"class":"email", "sentence":"can I have your business email?"})
+# training_data.append({"class":"email", "sentence":"your email address?"})
+# training_data.append({"class":"email", "sentence":"email please?"})
+# training_data.append({"class":"email", "sentence":"may I have your email?"})
+# training_data.append({"class":"email", "sentence":"can I get your email?"})
+
+# LOAD DATA
 
 
-training_data.append({"class":"goodbye", "sentence":"have a nice day"})
-training_data.append({"class":"goodbye", "sentence":"see you later"})
-training_data.append({"class":"goodbye", "sentence":"have a nice day"})
-training_data.append({"class":"goodbye", "sentence":"talk to you soon"})
-training_data.append({"class":"goodbye", "sentence":"peace"})
-training_data.append({"class":"goodbye", "sentence":"catch you later"})
-training_data.append({"class":"goodbye", "sentence":"talk to you soon"})
-training_data.append({"class":"goodbye", "sentence":"farewell"})
-training_data.append({"class":"goodbye", "sentence":"have a good day"})
-training_data.append({"class":"goodbye", "sentence":"take care"})
-# 10 training datas
-training_data.append({"class":"goodbye", "sentence":"bye!"})
-training_data.append({"class":"goodbye", "sentence":"have a good one"})
-training_data.append({"class":"goodbye", "sentence":"so long"})
-training_data.append({"class":"goodbye", "sentence":"i'm out"})
-training_data.append({"class":"goodbye", "sentence":"smell you later"})
-training_data.append({"class":"goodbye", "sentence":"talk to you later"})
-training_data.append({"class":"goodbye", "sentence":"take it easy"})
-training_data.append({"class":"goodbye", "sentence":"i'm off"})
-training_data.append({"class":"goodbye", "sentence":"until next time"})
-training_data.append({"class":"goodbye", "sentence":"it was nice seeing you"})
+###########
 
-training_data.append({"class":"goodbye", "sentence":"it's been real"})
-training_data.append({"class":"goodbye", "sentence":"im out of here"})
 
-training_data.append({"class":"sandwich", "sentence":"make me a sandwich"})
-training_data.append({"class":"sandwich", "sentence":"can you make a sandwich?"})
-training_data.append({"class":"sandwich", "sentence":"having a sandwich today?"})
-training_data.append({"class":"sandwich", "sentence":"what's for lunch?"})
 
-training_data.append({"class":"email", "sentence":"what's your email address?"})
-training_data.append({"class":"email", "sentence":"may I get your email?"})
-training_data.append({"class":"email", "sentence":"can I have your email?"})
-training_data.append({"class":"email", "sentence":"what's your email?"})
-training_data.append({"class":"email", "sentence":"let me get your email"})
-training_data.append({"class":"email", "sentence":"give me your email"})
-training_data.append({"class":"email", "sentence":"i'll take your email address"})
-training_data.append({"class":"email", "sentence":"can I have your business email?"})
-training_data.append({"class":"email", "sentence":"your email address?"})
-training_data.append({"class":"email", "sentence":"email please?"})
-training_data.append({"class":"email", "sentence":"may I have your email?"})
-training_data.append({"class":"email", "sentence":"can I get your email?"})
 
 CLASS_WORDS = {}
 
@@ -108,6 +124,11 @@ def initializeData():
     global CLASSES
     global CLASS_DICT
     global TRAINING_DATA_STATS
+    global training_data
+    global test_data
+
+    random.shuffle(training_data)
+    random.shuffle(test_data)
 
     for i in range(len(CLASSES)):
         CLASS_DICT[CLASSES[i]] = Class(CLASSES[i])
@@ -190,8 +211,6 @@ def transformTermFrequency():
     for key, val in CLASS_DICT.iteritems():
         for doc in val.documents:
             doc.normalizeWordFreq()
-            print doc.normalized_word_freq
-            print doc.word_freq
 
 def transformByDocFrequency():
     """
@@ -247,26 +266,22 @@ def skewDataBiasHandler():
 
     alpha = 1
 
-    # for c in CLASSES:
-    #     for doc in CLASS_DICT[c].documents:
-    #         print doc.classification, ": ", doc.data
-
     for key, val in TRAINING_DATA_STATS.word_freq.iteritems():
         numerator = 0
         denominator = 0
         totalAlpha = 0
         for c in CLASSES:
-            if key != c:
-                for doc in CLASS_DICT[c].documents:
+            for doc in CLASS_DICT[c].documents:
+                if doc.classification != key:
                     # I have each individual document
                     try:
                         numerator += doc.normalized_word_freq[key] + alpha
                         totalAlpha += 1
                     except:
                         pass
-                    denominator += doc.sumNormalizedFreq() + totalAlpha
+                    denominator += doc.sumNormalizedFreq()
         # print key, "| Numerator: ", numerator, "Denominator: ", denominator
-        TRAINING_DATA_STATS.word_normalized_freq[key] = numerator/denominator
+        TRAINING_DATA_STATS.word_normalized_freq[key] = numerator/(denominator + totalAlpha)
 
     # for key, val in TRAINING_DATA_STATS.word_normalized_freq.iteritems():
     #     print key, "||| ", val
@@ -295,8 +310,40 @@ def normalizeWordWeights():
     for key, val in TRAINING_DATA_STATS.word_weight.iteritems():
         TRAINING_DATA_STATS.word_weight[key] = val / total
 
-    for key, val in TRAINING_DATA_STATS.word_weight.iteritems():
-        print key, ": ", val
+    # for key, val in TRAINING_DATA_STATS.word_weight.iteritems():
+    #     print key, ": ", val
+
+def calculateClassScore(sentence, class_name, show_details=True):
+    global CLASS_DICT
+    score = 0
+    for word in nltk.word_tokenize(sentence):
+        word = stemmer.stem(word.lower())
+
+        if word in CLASS_DICT[class_name].word_freq:
+            # Treat each word with relative weight Times word frequency
+            current_score = TRAINING_DATA_STATS.word_weight[word]
+            score += current_score
+
+            if show_details:
+                print (class_name,
+                "   match: %s (%s)" % (word, current_score))
+    return score
+
+def classifyTWCNB(sentence):
+    global CLASS_DICT
+
+    best_class = None
+    best_score = 0
+    # loop through our classes
+    for c in CLASS_DICT.keys():
+        # calculate score of sentence for each class
+        score = calculateClassScore(sentence, c, show_details=False)
+        # keep track of highest score
+        if score > best_score:
+            best_class = c
+            best_score = score
+
+    return best_class, best_score
 
 ####### MULTINOMIAL NAIVE BAYES TEST CODE #######
 
@@ -323,7 +370,7 @@ def classify(sentence):
     # loop through our classes
     for c in CLASS_DICT.keys():
         # calculate score of sentence for each class
-        score = calculate_class_score(sentence, c)
+        score = calculate_class_score(sentence, c, show_details=False)
         # keep track of highest score
         if score > high_score:
             high_class = c
@@ -332,19 +379,109 @@ def classify(sentence):
     return high_class, high_score
 #####################################################
 
-# def classifyTWCNB(sentence):
-#
+######## ACCURACY TEST ################
 
-if __name__ == "__main__":
+def getAccuracy(test_data, show_details= True):
+    """
+    Find the accuracy of the classifier by feed it sentences from test_data
+    :param test_data: List of sentences with classifications
+    :return: The percent classified correctly
+    """
+    initializeData()
+    total = len(test_data)
+    correct = 0
+
+    for data in test_data:
+        high_class = classify(data['sentence'])[0]
+        if high_class == data['class']:
+            correct += 1
+        if show_details == True:
+            print "High Class: ", high_class, " ", type(high_class), " ", len(high_class)
+            print "Correct Class: ", data['class'], " ", type(data['class']), " ", len(data['class'])
+
+    return (correct * 1.0)/total
+
+def getAverageAccuracy(repeats, test_data):
+    """
+    Run the accuracy after "repeats" amount of time and get the average
+    :param repeats: The total number of times to run get Accuracy
+    :param test_data: The data being fed into accuracy
+    :return: The averaged percentage
+    """
+    totalAccuracy = 0
+    count = 0
+
+    while count < repeats:
+        totalAccuracy += getAccuracy(test_data,show_details=False)
+        count += 1
+    return totalAccuracy/repeats
+
+
+def getAccuracyTWCNB(test_data, show_details= True):
+    """
+    Find the accuracy of the classifier by feed it sentences from test_data
+    :param test_data: List of sentences with classifications
+    :return: The percent classified correctly
+    """
     initializeData()
     transformTermFrequency()
     transformByDocFrequency()
-    #transformByLength()
     skewDataBiasHandler()
     setWordWeights()
     normalizeWordWeights()
+
+    total = len(test_data)
+    correct = 0
+
+    for data in test_data:
+        high_class = classifyTWCNB(data['sentence'])[0]
+        if high_class == data['class']:
+            correct += 1
+        if show_details == True:
+            print "High Class: ", high_class, " ", type(high_class), " ", len(high_class)
+            print "Correct Class: ", data['class'], " ", type(data['class']), " ", len(data['class'])
+    print "REALLY THAT WAS IT??"
+    return (correct * 1.0)/total
+
+def getAverageAccuracyTWCNB(repeats, test_data):
+    """
+    Run the accuracy after "repeats" amount of time and get the average
+    :param repeats: The total number of times to run get Accuracy
+    :param test_data: The data being fed into accuracy
+    :return: The averaged percentage
+    """
+    totalAccuracy = 0
+    count = 0
+
+    while count < repeats:
+        totalAccuracy += getAccuracyTWCNB(test_data,show_details=False)
+        count += 1
+    return totalAccuracy/repeats
+
+#######################################
+
+if __name__ == "__main__":
+    # initializeData()
+    # transformTermFrequency()
+    # transformByDocFrequency()
+    # #transformByLength()
+    # skewDataBiasHandler()
+    # setWordWeights()
+    # normalizeWordWeights()
+    #
+    # sentence = "Hello how are you doing?"
+    # print classifyTWCNB(sentence)
+
 
     # Test using multinomial naive bayes
     # sentence = "Hello how are you doing?"
     #
     # print classify(sentence)
+
+
+    # TEST MULTINOMIAL NAIVE BAYES
+    # print getAverageAccuracy(10, test_data)
+
+    # TEST TWC-Naive-Bayes
+
+    print getAverageAccuracyTWCNB(3, test_data)
