@@ -1,4 +1,5 @@
 import re
+import random
 import pandas as pd
 
 TRAINING_DATA = []
@@ -12,12 +13,16 @@ with open("amazon_cells_labelled.txt") as f:
         TRAINING_DATA.append({'class':line[1].strip(), 'sentence':line[0].strip()})
     DATA['raw'] = TRAINING_DATA
 
-# for data in TRAINING_DATA:
-#     print data
-#
-# print len(TRAINING_DATA)
+def shuffleTrainingData():
+    global TRAINING_DATA
+    random.shuffle(TRAINING_DATA)
 
-# df = pd.DataFrame(DATA, columns = ['raw'])
+
+def readCSV():
+    df = pd.read_csv('Sentiment_Analysis_Dataset.csv', nrows=20 , names = ['Sentiment','SentimentText'])
+    df
+
+# df = pd.read_csv('Sentiment_Analysis_Dataset.csv', nrows=5000)
 #
-# df['class'] = df['raw'].str.extract('([A-Z]\w{0,})', expand = True)
-# print df['class']
+# for index, row in df.iterrows():
+#     TRAINING_DATA.append({'class':row['Sentiment'], 'sentence':row['SentimentText']})

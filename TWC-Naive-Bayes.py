@@ -29,9 +29,10 @@ from DocumentClass import Document
 stemmer = LancasterStemmer()
 
 # TESTING PURPOSES
-
+ReadData.shuffleTrainingData()
 training_data = ReadData.TRAINING_DATA[:800]
 test_data = ReadData.TRAINING_DATA[800:]
+
 
 # 3 classes of training data. Play around with this
 # training_data = []
@@ -120,8 +121,9 @@ def initializeData():
     global training_data
     global test_data
 
-    random.shuffle(training_data)
-    random.shuffle(test_data)
+    ReadData.shuffleTrainingData()
+    training_data = ReadData.TRAINING_DATA[:800]
+    test_data = ReadData.TRAINING_DATA[800:]
 
     for i in range(len(CLASSES)):
         CLASS_DICT[CLASSES[i]] = Class(CLASSES[i])
@@ -289,22 +291,23 @@ def skewDataBiasHandler():
     for key, val in TRAINING_DATA_STATS.word_normalized_freq.iteritems():
         numerator = 0
         denominator = 0
-        totalAlpha = 0
         for c in CLASSES:
             # total sum - all instances of word found in class
+            wordNormalizedFrequency = 0
             wordFrequency = 0
             if key in CLASS_DICT[c].normalized_word_weight:
-                wordFrequency = CLASS_DICT[c].normalized_word_weight[key]
+                wordNormalizedFrequency = CLASS_DICT[c].normalized_word_weight[key]
+                wordFrequency = CLASS_DICT[c].word_freq[key]
 
             # print key, " Total Freq ", val
             # print "Class Freq: ", wordFrequency
 
-            numerator = ((val + val * alpha) - (wordFrequency + wordFrequency * alpha))
+            numerator = ((val + TRAINING_DATA_STATS.word_freq[key] * alpha) - (wordNormalizedFrequency + wordFrequency * alpha))
 
             # print "Normalized Freq: ", TRAINING_DATA_STATS.getTotalNormalizedFreq()
             # print "Total Normalized Weight: ",CLASS_DICT[c].total_normalized_weight
             denominator = (TRAINING_DATA_STATS.getTotalNormalizedFreq() - CLASS_DICT[c].total_normalized_weight) * 1.0 + \
-                          (val * alpha - wordFrequency * alpha)
+                          (TRAINING_DATA_STATS.word_freq[key] * alpha - wordFrequency * alpha)
 
             # print "Numerator: ", numerator
             # print "Denominator: ", denominator
@@ -340,11 +343,28 @@ def normalizeWordWeights():
     #     print key, ": ", val
 
 def calculateClassScore(sentence, class_name, show_details=True):
+    """
+    Calculate the score of the class_name based on the sentence passed in.
+    :param sentence: The sentence that will be scored
+    :param class_name: The name of the class
+    :param show_details: To show more information
+    :return: The score of the class
+    """
+    "One thing to note. People suck at typing"
     global CLASS_DICT
     score = 0
 
-    for word in nltk.word_tokenize(sentence):
-        word = stemmer.stem(word.lower())
+    try:
+        sentence = nltk.word_tokenize(sentence)
+    except:
+        pass
+
+    # for word in nltk.word_tokenize(sentence):
+    for word in sentence:
+        try:
+            word = stemmer.stem(word.lower())
+        except:
+            pass
 
         if word in CLASS_DICT[class_name].normalized_word_weight:
             # Treat each word with relative weight Times word frequency
@@ -473,7 +493,7 @@ def getAccuracyTWCNB(test_data, show_details= True):
         if show_details == True:
             print "High Class: ", high_class, " ", type(high_class), " ", len(high_class)
             print "Correct Class: ", data['class'], " ", type(data['class']), " ", len(data['class'])
-    print "REALLY THAT WAS IT??"
+    # print "REALLY THAT WAS IT??"
     return (correct * 1.0)/total
 
 def getAverageAccuracyTWCNB(repeats, test_data):
@@ -488,8 +508,7 @@ def getAverageAccuracyTWCNB(repeats, test_data):
 
     while count < repeats:
         accuracy = getAccuracyTWCNB(test_data,show_details=False)
-        print count, ": ", accuracy
-
+        # print count, ": ", accuracy
         totalAccuracy += accuracy
         count += 1
     return totalAccuracy/repeats
@@ -504,6 +523,9 @@ if __name__ == "__main__":
     # skewDataBiasHandler()
     # setWordWeights()
     # normalizeWordWeights()
+    #
+    # print classifyTWCNB("This was bad. How can something good be so bad?")
+    #
     #
     # for values in CLASS_DICT.values():
     #     print values.class_name
@@ -521,15 +543,16 @@ if __name__ == "__main__":
     # print classify(sentence)
 
 
-    # TEST MULTINOMIAL NAIVE BAYES
+    ###### TEST MULTINOMIAL NAIVE BAYES
     # print getAverageAccuracy(10, test_data)
 
-    # TEST TWC-Naive-Bayes
+    ###### TEST TWC-Naive-Bayes
 
     print getAverageAccuracyTWCNB(10, test_data)
 
-    # random.shuffle(training_data)
-    # random.shuffle(test_data)
+
+    ###### TEST REGULAR NAIVE BAYES
+    # initializeData()
     # all_words = set(word.lower() for doc in training_data for word in nltk.word_tokenize(doc['sentence']))
     # featuresets = [({word: (word in nltk.word_tokenize(x['sentence'])) for word in all_words}, x['class']) for x in training_data]
     #
