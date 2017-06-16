@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cb719ffa-d0d1-43b7-a631-89fb56082039" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ReadData.py" afterPath="$PROJECT_DIR$/ReadData.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TWC-Naive-Bayes.py" afterPath="$PROJECT_DIR$/TWC-Naive-Bayes.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -37,14 +36,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TWC-Naive-Bayes.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="TWC-Naive-Bayes.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/TWC-Naive-Bayes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7536">
+            <state relative-caret-position="540">
               <caret line="551" column="0" lean-forward="true" selection-start-line="551" selection-start-column="0" selection-end-line="551" selection-end-column="0" />
               <folding>
                 <element signature="e#249#262#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="506">
+              <caret line="101" column="5" lean-forward="false" selection-start-line="101" selection-start-column="5" selection-end-line="101" selection-end-column="5" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -157,6 +166,7 @@
         <option value="$PROJECT_DIR$/DocumentClass.py" />
         <option value="$PROJECT_DIR$/ReadData.py" />
         <option value="$PROJECT_DIR$/TWC-Naive-Bayes.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -581,16 +591,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/ReadData.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="286">
-          <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="2" selection-end-line="15" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/MultinomialNaiveBayes.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2596">
@@ -1017,11 +1017,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/TWC-Naive-Bayes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7536">
+        <state relative-caret-position="540">
           <caret line="551" column="0" lean-forward="true" selection-start-line="551" selection-start-column="0" selection-end-line="551" selection-end-column="0" />
           <folding>
             <element signature="e#249#262#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="506">
+          <caret line="101" column="5" lean-forward="false" selection-start-line="101" selection-start-column="5" selection-end-line="101" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>
