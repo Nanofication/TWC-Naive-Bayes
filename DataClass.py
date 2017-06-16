@@ -35,3 +35,9 @@ class TrainingData:
         for values in self.word_freq.values():
             total += values
         return total
+
+    def getTotalNormalizedFreq(self):
+        total = 0
+        for values in self.word_normalized_freq.values():
+            total += values
+        return total

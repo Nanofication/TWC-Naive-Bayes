@@ -16,6 +16,7 @@ class Class:
         self.documents = []
         self.word_weight = {}
         self.normalized_word_weight = {}
+        self.total_normalized_weight = 0
 
     def addToTotalClassWordFreq(self, word):
         if word not in self.word_freq:
@@ -35,8 +36,11 @@ class Class:
 
     def getTotalWordWeight(self):
         total = 0
-        for key, val in self.normalized_word_weight.iteritems():
+        for val in self.normalized_word_weight.values():
             total += val
+        return total
+
+
 
         self.totalWordWeight = total
         return total
