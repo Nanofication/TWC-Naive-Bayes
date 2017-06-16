@@ -35,3 +35,16 @@ class Document:
         self.sum_normalized_freq = sumFreq
 
         return sumFreq
+
+    def getTotalNormalizedFreqByLength(self):
+        """
+        Calculate the total frequencies in the document using the equation
+        by squaring each individual normalized frequency, summing them and square rooting the entire equation
+        :return: The solution after passing in the equation.
+        """
+        solution = 0.0
+        for frequency in self.normalized_word_freq.values():
+            solution += frequency**2
+
+        return math.sqrt(solution)
+

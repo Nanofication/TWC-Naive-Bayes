@@ -227,6 +227,37 @@ def transformByDocFrequency():
                 result = v * math.log10(numerator / denominator)
                 doc.normalized_word_freq[k] = result
 
+                # if k not in val.normalized_word_weight:
+                #     val.normalized_word_weight[k] = doc.normalized_word_freq[k]
+                # else:
+                #     val.normalized_word_weight[k] += doc.normalized_word_freq[k]
+                #
+                # if k not in TRAINING_DATA_STATS.word_normalized_freq:
+                #     TRAINING_DATA_STATS.word_normalized_freq[k] = doc.normalized_word_freq[k]
+                # else:
+                #     TRAINING_DATA_STATS.word_normalized_freq[k] += doc.normalized_word_freq[k]
+                #
+                # val.total_normalized_weight += result
+
+
+
+def transformByLength():
+    """
+    Convert d_ij by dividing this value with the square root of
+    The sum of the square of number of times a word exists in the document
+    :return:
+    """
+    global CLASS_DICT
+    global TRAINING_DATA_STATS
+
+    for val in CLASS_DICT.values():
+        for doc in val.documents:
+            denominator = doc.getTotalNormalizedFreqByLength()
+            for k, v in doc.normalized_word_freq.iteritems():
+                result = v / denominator
+                doc.normalized_word_freq[k] = result
+                # print "Class: ", val.class_name, "Word: ", k, "Freq: ",doc.normalized_word_freq[k]
+
                 if k not in val.normalized_word_weight:
                     val.normalized_word_weight[k] = doc.normalized_word_freq[k]
                 else:
@@ -239,25 +270,6 @@ def transformByDocFrequency():
 
                 val.total_normalized_weight += result
 
-
-#
-# def transformByLength():
-#     """
-#     Convert d_ij by dividing this value with the square root of
-#     The sum of the square of number of times a word exists in the document
-#     :return:
-#     """
-#     global CLASS_DICT
-#     global TRAINING_DATA_STATS
-#
-#     for key, val in CLASS_DICT.iteritems():
-#         for doc in val.documents:
-#             for k, v in doc.normalized_word_freq.iteritems():
-#                 denominator = math.sqrt((TRAINING_DATA_STATS.word_freq[k])**2)
-#                 doc.normalized_word_freq[k] = val / denominator
-#                 print doc.normalized_word_freq
-#
-#   Multinomial Naive Bayes solves this issue, but look into it in future
 
 def skewDataBiasHandler():
     """
@@ -284,11 +296,8 @@ def skewDataBiasHandler():
             if key in CLASS_DICT[c].normalized_word_weight:
                 wordFrequency = CLASS_DICT[c].normalized_word_weight[key]
 
-            # numerator = ((val) - (wordFrequency))
-            #
-            # denominator = (TRAINING_DATA_STATS.getTotalFreq() - CLASS_DICT[c].word_count) * 1.0
-            print key, " Total Freq ", val
-            print "Class Freq: ", wordFrequency
+            # print key, " Total Freq ", val
+            # print "Class Freq: ", wordFrequency
 
             numerator = ((val + val * alpha) - (wordFrequency + wordFrequency * alpha))
 
@@ -297,8 +306,8 @@ def skewDataBiasHandler():
             denominator = (TRAINING_DATA_STATS.getTotalNormalizedFreq() - CLASS_DICT[c].total_normalized_weight) * 1.0 + \
                           (val * alpha - wordFrequency * alpha)
 
-            print "Numerator: ", numerator
-            print "Denominator: ", denominator
+            # print "Numerator: ", numerator
+            # print "Denominator: ", denominator
             CLASS_DICT[c].normalized_word_weight[key] = numerator/denominator
 
 def setWordWeights():
@@ -449,6 +458,7 @@ def getAccuracyTWCNB(test_data, show_details= True):
     initializeData()
     transformTermFrequency()
     transformByDocFrequency()
+    transformByLength()
     skewDataBiasHandler()
     setWordWeights()
     normalizeWordWeights()
@@ -490,7 +500,7 @@ if __name__ == "__main__":
     # initializeData()
     # transformTermFrequency()
     # transformByDocFrequency()
-    # #transformByLength()
+    # transformByLength()
     # skewDataBiasHandler()
     # setWordWeights()
     # normalizeWordWeights()

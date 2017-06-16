@@ -40,8 +40,3 @@ class Class:
             total += val
         return total
 
-
-
-        self.totalWordWeight = total
-        return total
-
